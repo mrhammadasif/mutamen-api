@@ -21,7 +21,7 @@ It have the following preconfigured libraries and tools:
 ## How to Install from Server
 
 ```bash
-git clone git@github.com:NitroxisInc/nitroXpress.git PROJECTNAME
+git clone git@github.com:mrhammadasif/mutamen-api.git PROJECTNAME
 cd PROJECTNAME
 npm install
 #  or
