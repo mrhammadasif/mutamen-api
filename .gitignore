@@ -66,5 +66,3 @@ public/uploads/*
 public/css/style.css
 public/js/bundle.js
 build/
-
-.env
