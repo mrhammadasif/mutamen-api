@@ -1,0 +1,15 @@
+{
+  "files.exclude": {
+    "dist/": true
+  },
+  "eslint.autoFixOnSave": true,
+  "eslint.validate": [
+    "javascript",
+    {
+      "language": "typescript",
+      "autoFix": true
+    }
+  ],
+  "editor.formatOnSave": true,
+  "prettier.disableLanguages": ["vue", "typescript", "javascript"]
+}

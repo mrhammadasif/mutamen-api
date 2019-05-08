@@ -1,0 +1,184 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+  <h1 class="h2">Questions</h1>
+</div>
+<script>
+  var questions = {{{ questionsJson }}}
+  function getQuestion(questionId) {
+    return questions.find(question => question._id === questionId)
+  }
+  function showLoading() {
+    $("#loading-overlay").show()
+  }
+
+  function hideLoading() {
+    $("#loading-overlay").hide()
+  }
+
+  $(function () {
+    var currentlyEditing = {}
+    var currentlyEditingId = ""
+    $('.editbtn').click(function () {
+      var currentTable = $(this).parents('table');
+      var currentTR = $(this).parents('tr');
+      var currentTD = $(this).parents('tr').find('td[data-key]');
+      var deleteBtn = $(this).parents('tr').find('td').find(".del-btn");
+      var currentBtn = $(this)
+
+
+      $(".del-btn", currentTable).show()
+
+      if (currentBtn.html() == 'Edit') {
+        $(".col-error").removeClass("col-error")
+
+        if (currentlyEditingId !== "") {
+          alert("Finish editing the selected first")
+          return false;
+        }
+        currentlyEditing = getQuestion(currentTR.data("id"))
+
+        currentlyEditingId = currentTR.data("id")
+
+
+
+        currentBtn.html('Save')
+        currentTR.addClass("highlighted")
+
+        // $("tr", currentTable).removeClass("highlighted")
+        deleteBtn.hide()
+        $.each(currentTD, function () {
+          $(this).prop('contenteditable', true)
+        });
+      } else {
+
+        if (currentBtn.html() == 'Save') {
+          showLoading()
+          currentTD.each(function (index, elem) {
+            currentlyEditing[$(elem).data("key")] = $(elem).html()
+          })
+          $.post("/admin/update_question/" + currentTR.data("id"), {
+            question: currentlyEditing.question,
+            answer: currentlyEditing.answer,
+            explanation: currentlyEditing.explanation,
+            difficulty: currentlyEditing.difficulty,
+            wrongAnswer1: currentlyEditing.wrongAnswer1,
+            wrongAnswer2: currentlyEditing.wrongAnswer2,
+            wrongAnswer3: currentlyEditing.wrongAnswer3,
+            _csrf: "{{csrfToken}}"
+          })
+            .fail(function (err) {
+              hideLoading()
+              if (err.responseJSON.length > 0) {
+                $.each(err.responseJSON, function (i, e) {
+                  $("[data-key=" + e.param + "]", currentTR).addClass("col-error")
+                  $("[data-key=" + e.param + "]", currentTR).attr("title", e.msg)
+                  $("[data-key=" + e.param + "]", currentTR).trigger("hover")
+                })
+              }
+            })
+            .done(function (resp) {
+              hideLoading()
+              deleteBtn.show()
+              currentTR.removeClass("highlighted")
+              currentlyEditingId = ""
+              $.each(currentTD, function () {
+                $(this).prop('contenteditable', false)
+              });
+
+              currentBtn.html('Edit')
+
+              var oldBg = currentTR.css("backgroundColor")
+              currentTR.css({
+                backgroundColor: "#E0FFD5"
+              })
+
+              setTimeout(function () {
+
+                currentTR.css({
+                  backgroundColor: oldBg
+                })
+              }, 1000)
+
+            })
+        }
+      }
+
+
+
+    });
+  })
+</script>
+
+<div class="table-responsive">
+  <table id="eTable" class="table table-striped table-sm">
+    <thead>
+      <tr>
+        <th style="width: 100px;">Category</th>
+        <th style="width: 100px;">Difficulty</th>
+        <th>Question</th>
+        <th>Explanation</th>
+        <th>Correct Answer</th>
+        <th>Wrong Answer 1</th>
+        <th>Wrong Answer 2</th>
+        <th>Wrong Answer 3</th>
+        <th style="width: 100px;"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each questions}}
+      <tr id="question-{{_id}}" data-id="{{_id}}">
+        <td>{{category.title}}</td>
+        <td data-key="difficulty">{{difficulty}}</td>
+        <td data-key="question">{{questionText}}</td>
+        <td data-key="explanation">{{explanation}}</td>
+        {{#each answers}}
+        <td data-key="{{keyWA @index}}">{{answerText}}</td>
+        {{/each}}
+        <td>
+          <button class="btn btn-outline-warning editbtn">Edit</button>
+          <button class="btn btn-outline-danger popover-trigger del-btn" data-container="body" data-trigger="hover"
+            data-toggle="focus" data-placement="top" data-html="true" data-title="Do you want to delete this question?"
+            data-content="<a class='btn btn-danger btn-block' href='/admin/delete_question/{{_id}}'>
+            <i class='fas fa-times'></i> YES, REMOVE
+            </a>">
+            <i class="fas fa-times"></i>
+
+          </button>
+        </td>
+      </tr>
+      {{/each}}
+
+    </tbody>
+  </table>
+  <hr>
+  <form class="d-flex" action="/admin/question" method="POST">
+
+    <select class="form-control" name="category" required>
+      <option value="" disabled selected>Select Category ...</option>
+      {{#each categories}}
+      <option value="{{_id}}">{{title}}</option>
+      {{/each}}
+    </select>
+    <select class="form-control" name="difficulty" required>
+      <option value="" disabled selected>Select Difficulty ...</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+      <option value="7">7</option>
+      <option value="8">8</option>
+      <option value="9">9</option>
+      <option value="10">10</option>
+    </select>
+    <input type="text" name="question" required class="form-control" style="width: 400px;" placeholder="Question">
+    <input type="text" name="explanation" required class="form-control" style="width: 400px;"
+      placeholder="Explain Correct Answer">
+    <input type="text" name="answer" required class="form-control" placeholder="Correct Answer">
+    <input type="text" name="wrongAnswer1" required class="form-control" placeholder="Wrong Answer 1">
+    <input type="text" name="wrongAnswer2" required class="form-control" placeholder="Wrong Answer 2">
+    <input type="text" name="wrongAnswer3" required class="form-control" placeholder="Wrong Answer 3">
+    <input type="hidden" name="_csrf" value="{{csrfToken}}">
+    <button class="btn btn-success" type="submit">ADD</button>
+  </form>
+</div>

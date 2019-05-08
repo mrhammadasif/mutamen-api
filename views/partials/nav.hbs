@@ -1,0 +1,22 @@
+<nav class="navbar navbar-dark fixed-top bg-dark shadow">
+  <div class="container">
+    <a class="text-white px-2" href="/">Gamification</a>
+    <ul class="nav px-3">
+      <li class="nav-item">
+        <a class="nav-link {{#equal currentPageSlug 'dashboard'}}active{{/equal}}" href="/admin">
+          <i class="fas fa-bezier-curve    "></i>
+          Categories
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {{#equal currentPageSlug 'questions'}}active{{/equal}}" href="/admin/questions">
+          <i class="fas fa-question-circle"></i>
+          Questions
+        </a>
+      </li>
+      <li class="nav-item text-nowrap">
+        <a class="nav-link" href="/logout">Sign out</a>
+      </li>
+    </ul>
+  </div>
+</nav>
