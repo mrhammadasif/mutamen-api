@@ -1,10 +1,11 @@
 import * as express from "express"
 import * as asyncHandler from "express-async-handler"
-import {values, flatten} from "lodash"
+import {values, flatten, sortedUniq} from "lodash"
 import FavModel from "../models/favouriteCars"
 import {asyncForEach} from "../core/array-utils"
 import {GenerateResp, Reason} from "../core/common-errors"
-import {query} from "express-validator/check"
+import {query, body, validationResult} from "express-validator/check"
+import {validationErrorChecker} from "../core/error-handler"
 
 require("dotenv").config()
 
@@ -30,19 +31,26 @@ export class Controller {
 
   private insertFav = [
     [
-      query("customerName").exists(),
-      query("carA").exists(),
-      query("carB").exists(),
-      query("carC").exists()
+      body("customerName", "Valid Customer Name is Required").exists(),
+      body("carA", "Valid 3 Cars Required").exists(),
+      body("carB", "Valid 3 Cars Required").exists(),
+      body("carC", "Valid 3 Cars Required").exists()
     ],
     asyncHandler(async function (req: express.Request, res: express.Response) {
 
+      const errors = validationResult(req)
+      if (!errors.isEmpty()) {
+        return res.status(422).json(GenerateResp(
+          sortedUniq(errors.array().map((er: any) => er.msg)),
+          Reason.validation))
+      }
+
       const newFav = new FavModel({
-        customerName: req.query.customerName,
+        customerName: req.body.customerName,
         cars: [
-          req.query.carA,
-          req.query.carB,
-          req.query.carC
+          req.body.carA,
+          req.body.carB,
+          req.body.carC
         ]
       })
       await newFav.save()
