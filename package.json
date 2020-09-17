@@ -31,7 +31,7 @@
     "jquery": "^3.4.0",
     "jquery-mask-plugin": "^1.14.15",
     "jsonwebtoken": "^8.3.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.19",
     "method-override": "^3.0.0",
     "mime": "^2.4.2",
     "moment": "^2.18.1",
